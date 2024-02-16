@@ -16,7 +16,7 @@
 * Access Token Request
 * The Scope Parameter
 * Missing "openid" scope
-* Purpose as part of scope
+* Purpose
 * ID Token sub claim
 * Client Authentication
 * OpenId Foundation Certification
