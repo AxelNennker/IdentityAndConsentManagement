@@ -123,22 +123,6 @@ The client MUST authenticate with the authorization server as described in [Clie
 
 Scope values determine the specific CAMARA services being requested by the Service Provider, subject to the SP being registered to use those services. The scope values must be documented in the API OAS files by all Camara API subprojects.
 
-### Purpose as part of scope
-
-To improve interoperablitiy this document RECOMMENDS that API Working groups define each single scope value following this scheme:
-
-`dpv:<dpvValue>#<technical_scope>`
-
-- `<dpvValue>` is coming from [W3C DPV purpose definition](https://w3c.github.io/dpv/dpv/#vocab-purpose)
-- `<technical_scope>` some technical scope needed by the Camara API
-
-Example value of scope parameter in a request:
-```text
-openid dpv:<dpvValue>#camara-api-scope0 dpv:<dpvValue>#camara-api-scope-1 dpv:<dpvValue>#camara-api-scope-2
-```
-
-This document does not change OIDC definitions of scope values.
-
 
 ## Missing "openid" scope
 
@@ -149,6 +133,9 @@ This document defines the following error handling for a missing "openid" value 
 Please refer to [Authentication Error Response](https://openid.net/specs/openid-connect-core-1_0.html#AuthError).
 
 If "openid" is missing in the scope value, the Authorization Server returns an HTTP response code of 400 (Bad Request) and an error invalid_request.
+
+## Purpose
+TBD
 
 ## ID Token sub claim
 
