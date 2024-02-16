@@ -167,7 +167,7 @@ Camara Resource Servers MUST support and verify sender-constrained access tokens
 
 ## OpenId Foundation Certification
 
-Camara recommends that implementations run the OIDF interoperability suite and achive [OIDF certification](https://openid.net/certification/).
+Camara recommends that implementations run the OIDF interoperability suite and achieve [OIDF certification](https://openid.net/certification/).
 
 ## References
 
