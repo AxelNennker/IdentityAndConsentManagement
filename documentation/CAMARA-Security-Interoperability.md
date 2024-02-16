@@ -131,7 +131,7 @@ This document defines that Camara Clients SHOULD not use the acr_values paramete
 
 ### Purpose as part of scope
 
-This Camara document states that OpenID Connect requests MUST contain purpose in the scope value. Purpose shall be used from [W3C DPV purpose definition](https://w3c.github.io/dpv/dpv/#vocab-purpose). Below is an example how purpose is added to scope values.
+Below is an example how purpose is added to scope values.
 
 `dpv:<dpvValue>#<space delimited scope values>`
 
