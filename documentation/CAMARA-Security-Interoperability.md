@@ -15,8 +15,8 @@
 * Handling of acr_values
 * Access Token Request
 * The Scope Parameter
-  *  Purpose as part of scope
 * Missing "openid" scope
+* Purpose as part of scope
 * ID Token sub claim
 * Client Authentication
 * OpenId Foundation Certification
