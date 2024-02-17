@@ -136,7 +136,7 @@ If "openid" is missing in the scope value, the Authorization Server returns an H
 
 ## Purpose
 A transaction specific request parameter purpose as speicified in [openid-connect-4-identity-assurance-1_0-13](https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#name-transaction-specific-purpos) MUST be used to allow a SP to state the purpose for the transfer of End-User data it is asking for.
-The purpose string example MUST use below format for interoperability
+The purpose string MUST use below format for interoperability
 
 `dpv:<dpvValue>` 
 
