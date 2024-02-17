@@ -135,7 +135,7 @@ Please refer to [Authentication Error Response](https://openid.net/specs/openid-
 If "openid" is missing in the scope value, the Authorization Server returns an HTTP response code of 400 (Bad Request) and an error invalid_request.
 
 ## Purpose
-A transaction specific request parameter purpose as speicified in [openid-connect-4-identity-assurance-1_0-13](https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#name-transaction-specific-purpos) MUST be used to allow a SP to state the purpose for the transfer of End-User data it is asking for.
+A transaction specific request parameter purpose as specified in [openid-connect-4-identity-assurance-1_0-13](https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#name-transaction-specific-purpos) MUST be used to allow a SP to state the purpose for the transfer of End-User data it is asking for.
 The purpose string MUST use below format for interoperability
 
 `dpv:<dpvValue>` 
