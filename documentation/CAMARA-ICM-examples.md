@@ -21,7 +21,7 @@ This document does not say that the access token is self-contained or not.
 
 ### Purpose as a scope: Requesting one purpose, two scopes of the same API
 
-#### OIDC authorization code flow: one purpose as scope
+#### OIDC authorization code flow with one purpose as scope
 
 ```
 GET /authorize?
@@ -33,7 +33,7 @@ GET /authorize?
 Host: server.example.com
 ```
 
-#### RFC9101 request object: one purpose as scope
+#### RFC9101 request object with one purpose as scope
 
 ```
 {
@@ -50,9 +50,9 @@ Host: server.example.com
 ```
 
 
-### Purpose encoded in scope: Requesting one purpose, two scopes of the same API
+### Requesting one purpose, two scopes of the same API with purpose encoded in scope 
 
-#### OIDC authorization code flow: two scopes one purpose
+#### OIDC authorization code flow with two scopes and one purpose
 
 ```
 GET /authorize?
@@ -64,7 +64,7 @@ GET /authorize?
 Host: server.example.com
 ```
 
-#### RFC9101 request object: two scopes one purpose
+#### RFC9101 request object with two scopes and one purpose
 
 ```
 {
@@ -82,7 +82,7 @@ Host: server.example.com
 
 ### Purpose as a Authentication Request Parameter
 
-#### OIDC authorization code flow: purpose as a Authentication Request Parameter
+#### OIDC authorization code flow: with purpose as a Authentication Request Parameter
 
 ```
 GET /authorize?
@@ -95,7 +95,7 @@ GET /authorize?
 Host: server.example.com
 ```
 
-#### RFC9101 request object one purpose
+#### RFC9101 request object with one purpose
 
 ```
 {
@@ -143,9 +143,9 @@ Host: server.example.com
 ```
 
 
-### RFC7662 response: two scopes, one purpose
+### RFC7662 response with two scopes, one purpose
 
-#### Access Token Variant 1: Response on introspecting an access token
+#### Access Token Variant 1 Response on introspecting an access token with string scope
 
 **Note**: The RS might have to split `purpose` and `technical-scope`.
 
@@ -163,7 +163,7 @@ Host: server.example.com
 }
 ```
 
-#### Access Token Variant 2: Response on introspecting an access token
+#### Access Token Variant 2 Response on introspecting an access token with scopes object
 
 ```
 {
@@ -285,7 +285,7 @@ Host: server.example.com
 
 Please note again that access token content or structure are not part of the OAuth2 nor the OIDC standard. These are examples.
 
-#### Access Token Variant 1: Response on introspecting an access token with two purpose
+#### Access Token Variant 1 Response on introspecting an access token with two purpose
 
 **Note**: The RS might have to split `purpose` and `technical-scope`.
 
@@ -303,7 +303,7 @@ Please note again that access token content or structure are not part of the OAu
 }
 ```
 
-#### Access Token Variant 2: Response on introspecting an access token with two purpose
+#### Access Token Variant 2 Response on introspecting an access token with two purpose
 
 **Note**: The value of the `technical-scope` is an array of `purpose`, so one `technical-scope` can have different `purpose` values.
 
