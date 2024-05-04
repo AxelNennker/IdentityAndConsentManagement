@@ -188,7 +188,7 @@ Host: server.example.com
 ---
 **Note**
 
-These following examples are only here now to demonstrate extensibility of the diffirent options in requestion `purpose`.
+These following examples are only here now to demonstrate extensibility of the different options in requesting `purpose`.
 Please ignore for now otherwise.
 
 ---
