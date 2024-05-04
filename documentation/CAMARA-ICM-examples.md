@@ -143,9 +143,9 @@ Host: server.example.com
 ```
 
 
-### [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response for **purpose**
+### RFC7662 response: two scopes, one purpose
 
-#### Access Token Variant 1 [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response on introspecting an access token
+#### Access Token Variant 1: Response on introspecting an access token
 
 **Note**: The RS might have to split `purpose` and `technical-scope`.
 
@@ -163,7 +163,7 @@ Host: server.example.com
 }
 ```
 
-#### Access Token Variant 2 [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response on introspecting an access token
+#### Access Token Variant 2: Response on introspecting an access token
 
 ```
 {
@@ -281,11 +281,11 @@ Host: server.example.com
 }
 ```
 
-### [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response on introspecting an access token with two purpose
+### RFC7662 response: two scopes, two purpose
 
 Please note again that access token content or structure are not part of the OAuth2 nor the OIDC standard. These are examples.
 
-#### Access Token Variant 1 [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response on introspecting an access token with two purpose
+#### Access Token Variant 1: Response on introspecting an access token with two purpose
 
 **Note**: The RS might have to split `purpose` and `technical-scope`.
 
@@ -303,7 +303,7 @@ Please note again that access token content or structure are not part of the OAu
 }
 ```
 
-#### Access Token Variant 2 [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response on introspecting an access token with two purpose
+#### Access Token Variant 2: Response on introspecting an access token with two purpose
 
 **Note**: The value of the `technical-scope` is an array of `purpose`, so one `technical-scope` can have different `purpose` values.
 
@@ -324,7 +324,7 @@ Please note again that access token content or structure are not part of the OAu
 }
 ```
 
-#### Access Token Variant 3 [RFC7662](https://datatracker.ietf.org/doc/html/rfc7662) response on introspecting an access token with two purpose and RAR
+#### Access Token Variant 3 Response on introspecting an access token with two purpose and RAR
 
 **Note**: [RAR suggests replacing `scope` by `location`](https://www.rfc-editor.org/rfc/rfc9396#name-relationship-to-the-scope-p). `location` is the path-element in openapi.yaml e.g. [sim_swap.yaml](https://github.com/camaraproject/SimSwap/blob/main/code/API_definitions/sim_swap.yaml).
 
