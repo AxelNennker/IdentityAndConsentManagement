@@ -57,7 +57,7 @@ The list below introduces several key concepts:
 -	`Scope`: the OpenID Connect scope which maps one or more protected resources, some scopes may require processing of Personal Data.
 - `Subscriber`: the mobile subscriber of the Operator. The Subscriber is usually also the End-User, but this is not always the case. For example, a parent may be the Subscriber of a mobile subscription for their child, the End-User.
 - `Three-Legged Access Token`: an access token that involves three parties: the Resource Owner (User), the Authorization Server (operated by the Operator or Aggregator), and the client (the ASP's Application). In CAMARA, Three-Legged Access Tokens are typically created using the OIDC Authorization Code flow or Client-Initiated Backchannel Authentication (CIBA) flow.
-- `Two-Legged Access Token`: an access token that involves two parties, the Authorization Server (operated by the Operator or Aggregator), and the client (the ASP's Application); the Two-Legged Access Token does not include a Resource Owner (User). The Authorization Server does not autenticate a User, nor can User Consent be captured or validated for Two-Legged Access Tokens; therefore Two-Legged Access Tokens must only be used for CAMARA APIs that do not process Personal Data.
+- `Two-Legged Access Token`: an access token that involves two parties, the Authorization Server (operated by the Operator or Aggregator), and the client (the ASP's Application); the Two-Legged Access Token does not include a Resource Owner (User). The Authorization Server does not authenticate a User, nor can User Consent be captured or validated for Two-Legged Access Tokens; therefore Two-Legged Access Tokens must only be used for CAMARA APIs that do not process Personal Data.
 
 ## Purpose within CAMARA
 
@@ -81,7 +81,7 @@ This section describes the authorization flows that can be used to access CAMARA
 
 Note: In cases where Personal Data is processed by a CAMARA API, and Users can exercise their rights through mechanisms such as opt-in and/or opt-out, the use of Three-Legged Access Tokens is mandatory.
 
-#### Authorization Code Flow (Frontend Flow)
+#### Authorization Code Flow (Frontend Flow) with Network-base Authentication
 
 ```mermaid
 sequenceDiagram
@@ -126,6 +126,54 @@ ExpO->>BE: CAMARA API Response
 Note over BE,FE: Response
 ```
 
+#### Authorization Code Flow (Frontend Flow) with operatortoken
+
+```mermaid
+sequenceDiagram
+autonumber
+title Consume a CAMARA API - Authorization Code Flow (FrontEnd)
+participant FE as Application on Consumption Device
+participant BE as Application<br>(Application Backend/Aggregator)
+box Operator
+  participant ExpO as API Exposure Platform
+  participant Consent as Consent Master
+  participant ECS as Entitlement Server
+end
+
+Note over FE,BE: Use Feature needing<br>Operator Capability  
+BE->>FE: Auth Needed - redirect <br>/authorize?response_type=code&client_id=coolApp<br>&scope=dpv:<purposeDpvValue> scope1 ... scopeN<br>&redirect_uri=invoker_callback...
+FE->>FE: get TS.43 temporary token
+FE->>+FE: Browser /<br> Embedded Browser
+alt Standard OIDC Auth Code Flow between Invoker and API Exposure Platform
+  FE-->>ExpO: GET /authorize?response_type=code&client_id=coolApp<br>&scope=dpv:<purposeDpvValue> scope1 ... scopeN<br>&login_hint="operatortoken:temporaryToken<br>&redirect_uri=invoker_callback...
+  ExpO->>ExpO: create ASAC.01 Eligibility Token
+  ExpO->>ECS: GetPhoneNumber(eligibilityToken, temporaryToken)
+  ECS->>ExpO: MSISDN
+  ExpO->>ExpO: Check legal basis of the purpose<br> e.g.: contract, legitimate_interest, consent, etc 
+  opt If User Consent is required for the legal basis of the purpose  
+    ExpO->>Consent: Check if Consent is granted    
+  end  
+  alt If Consent is Granted or Consent not needed for legal basis   
+    ExpO-->>FE: 302<br>Location: invoker_callback?code=Operatorcode
+  else If Consent is NOT granted - Consent Capture within AuthCode Flow  
+    Note over FE,ExpO: Start user consent capture process<br>following Section 3.1.2.4 of the OIDC Core 1.0 spec.    
+    alt If the user refuses consent
+      ExpO-->>FE: 302<br>Location: invoker_callback?error=access_denied
+    else If the user grants consent
+      ExpO-->>FE: 302<br>Location: invoker_callback?code=Operatorcode
+    end
+  end
+  FE-->>-BE: GET invoker_callback?code=OperatorCode
+  BE->>ExpO: POST /token<br> code=OperatorCode
+  ExpO->>BE: 200 OK <br> {OperatorAccessToken}
+end
+
+BE->>ExpO: Access Operator CAMARA API <br> Authorization: Bearer {OperatorAccessToken}        
+ExpO->>ExpO: Decrypt OperatorAccessToken,<br>grants Access,<br>progresses request to API Backend,<br>gets API response  
+ExpO->>BE: CAMARA API Response
+Note over BE,FE: Response
+```
+
 **Flow description**:
 
 Firstly, the API invoker (for example, the Application Backend) instructs the Application on the Consumption Device to initiate the OIDC Authorization Code Flow with the Operator. The authorization request includes the client_id of the ASP's Application requesting access to the API and the Application's redirect_uri (invoker_callback) where the authorization code will be sent.
@@ -134,7 +182,9 @@ As per the standard authorization code flow, the Application is redirected to th
 
 The Operator's API Exposure Platform receives the request from the Application (Step 3) and does the following:
 
-- Uses network based authentication to obtain the Subscriber's unique identifier,e.g.: phone number or IMSI. Sets the id_token sub to a unique user ID and associates the sub with the access token. The id_token sub MUST NOT reveal information to the Application, as authentication has not yet been performed. (Step 4).
+- If the login_hint contains an operator token, then get the Subscriber's unique identifier,e.g.: phone number or IMSI from the Entitlement Server
+- If there is no login_hint that contains an operator token, the platform uses network based authentication to obtain the Subscriber's unique identifier,e.g.: phone number or IMSI.
+- Sets the id_token sub to a unique user ID and associates the sub with the access token. The id_token sub MUST NOT reveal information to the Application, as authentication has not yet been performed. (Step 4).
 
 - Checks if User Consent is required, which depends on the legal basis associated with the Scope and Purpose. If necessary, it will check in the Operator's Consent Master whether User Consent has already been given for this Application, Scope and Purpose (Steps 5-6).
 
@@ -163,7 +213,7 @@ _NOTE: The technical ruleset is applicable only after a subproject has agreed to
 
 If all API usecases point to the need of an 'On-Net' scenario and where the Consumption Device and Authentication Device are the same, the Frontend flow SHOULD be used. eg. NumberVerification
 
-This flow is then applicable to On-Net scenarios where the mobile connection of the Consumption Device needs to be authenticated e.g. [CAMARA Number Verification API](https://github.com/camaraproject/NumberVerification/blob/main/documentation/API_documentation/assets/uml_v0.3.jpg) due to the nature of its functionality where a User's MSISDN needs to be compared to the MSISDN associated with the mobile connection of the Consumption Device. 
+This flow is then applicable to On-Net scenarios where the mobile connection of the Consumption Device needs to be authenticated e.g. [CAMARA Number Verification API](https://github.com/camaraproject/NumberVerification) due to the nature of its functionality where a User's MSISDN needs to be compared to the MSISDN associated with the mobile connection of the Consumption Device. 
 
 The Application on the Consumption Device must be able to handle browser redirects.
 
