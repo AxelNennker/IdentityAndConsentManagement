@@ -57,7 +57,7 @@ The list below introduces several key concepts:
 -	`Scope`: the OpenID Connect scope which maps one or more protected resources, some scopes may require processing of Personal Data.
 - `Subscriber`: the mobile subscriber of the Operator. The Subscriber is usually also the End-User, but this is not always the case. For example, a parent may be the Subscriber of a mobile subscription for their child, the End-User.
 - `Three-Legged Access Token`: an access token that involves three parties: the Resource Owner (User), the Authorization Server (operated by the Operator or Aggregator), and the client (the ASP's Application). In CAMARA, Three-Legged Access Tokens are typically created using the OIDC Authorization Code flow or Client-Initiated Backchannel Authentication (CIBA) flow.
-- `Two-Legged Access Token`: an access token that involves two parties, the Authorization Server (operated by the Operator or Aggregator), and the client (the ASP's Application); the Two-Legged Access Token does not include a Resource Owner (User). The Authorization Server does not autenticate a User, nor can User Consent be captured or validated for Two-Legged Access Tokens; therefore Two-Legged Access Tokens must only be used for CAMARA APIs that do not process Personal Data.
+- `Two-Legged Access Token`: an access token that involves two parties, the Authorization Server (operated by the Operator or Aggregator), and the client (the ASP's Application); the Two-Legged Access Token does not include a Resource Owner (User). The Authorization Server does not authenticate a User, nor can User Consent be captured or validated for Two-Legged Access Tokens; therefore Two-Legged Access Tokens must only be used for CAMARA APIs that do not process Personal Data.
 
 ## Purpose within CAMARA
 
@@ -163,7 +163,7 @@ _NOTE: The technical ruleset is applicable only after a subproject has agreed to
 
 If all API usecases point to the need of an 'On-Net' scenario and where the Consumption Device and Authentication Device are the same, the Frontend flow SHOULD be used. eg. NumberVerification
 
-This flow is then applicable to On-Net scenarios where the mobile connection of the Consumption Device needs to be authenticated e.g. [CAMARA Number Verification API](https://github.com/camaraproject/NumberVerification/blob/main/documentation/API_documentation/assets/uml_v0.3.jpg) due to the nature of its functionality where a User's MSISDN needs to be compared to the MSISDN associated with the mobile connection of the Consumption Device. 
+This flow is then applicable to On-Net scenarios where the mobile connection of the Consumption Device needs to be authenticated e.g. [CAMARA Number Verification API](https://github.com/camaraproject/NumberVerification) due to the nature of its functionality where a User's MSISDN needs to be compared to the MSISDN associated with the mobile connection of the Consumption Device. 
 
 The Application on the Consumption Device must be able to handle browser redirects.
 
@@ -286,6 +286,71 @@ If some use case(s) for an API point to "Off-net" scenarios and where Consumptio
     - Off-net scenarios (no mobile connection)
     - Device connected to WiFi
     - Device without UI (IoT)
+
+#### CIBA flow (Backend flow) with Operator Token
+
+The following sequence diagram is an example for a CIBA flow that has a `login_hint` parameter with a prefix `operatortoken:`.
+
+In [NumberVerification](https://github.com/camaraproject/NumberVerification) 2.0, NumberVerification over WiFi, the value of the `login_hint` is a TS.43 temporary token, as defined by [GSMA TS.43](https://www.gsma.com/get-involved/working-groups/wp-content/uploads/2024/04/TS.43-v12.0-Service-Entitlement-Configuration.pdf), that was created by the MNO's Entitlement Server.
+
+The example flow assumes that no opt-out is possible for NumberVerification. 
+The temporary token is only generated if the user gave their permission on an operating system level to its creation and use for NumberVerification.
+The temporary token acts as the User authentication.
+
+The Eligibility Token is created by the MNO's Authorization Server.
+The format used in this example is this:
+
+
+```json
+{}
+```
+
+
+```mermaid
+sequenceDiagram
+autonumber
+title Consume a CAMARA API - CIBA flow with Operator Token
+participant User as End User<br>@Authentication Device
+participant FE as Device App<br>(Consumption Device)
+participant BE as Invoker<br>(Application Backend/Aggregator)  
+box Operator
+  participant ExpO as API Exposure Platform  
+  participant Consent as Consent Master
+  participant ECS as Entitlement Server
+end
+
+Note over FE,BE: Feature needing<br>Operator capability  
+Note over BE: The temporary token is the user authentication  
+
+alt OIDC Client-Initiated Backchannel Authentication (CIBA) Flow between Invoker and Operator.
+  BE->>+ExpO: POST /bc-authorize<br> Credentials,<br>scope="dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",<br>login_hint="operatortoken:<temporaryToken>"   
+  ExpO->>ExpO: - set requestor_id to client_id
+  ExpO->>ExpO: - Create Eligiblity Token  
+  ExpO->>ECS: - POST GetPhoneNumber<br>temporary_token=<temporaryToken>&<br>access_token=<EligiblityToken>
+  ExpO->>ExpO: - Validate User Identifier<br>- (Opt) map to Telco Identifier e.g.: phone_number<br>- Set UserId (sub)  
+  ExpO->>ExpO: Check legal basis of the purpose<br> e.g.: contract, legitimate_interest, consent, etc
+  opt If User Consent is required for the legal basis of the purpose  
+    ExpO->>Consent: Check if Consent is granted
+  end
+  alt If Consent is Granted or Consent not needed for legal basis   
+    ExpO->>BE: HTTP 200 OK {"auth_req_id": "{OperatorAuthReqId}"  
+  else If Consent is needed and is NOT granted - Out Of Band Consent Capture (Push/SMS/other)
+    Note over ExpO,User: User Interaction <br> out-of-band capture consent mechanism chosen by the Operator
+    ExpO->>BE: HTTP 200 OK {"auth_req_id": "{OperatorAuthReqId}"}
+  end
+  loop Invoker polls until consent is granted or until expires. If granted in advance, token returned in first poll
+    BE->>+ExpO: POST /token <br>Credentials}<br>auth_req_id={OperatorAuthReqId}    
+    ExpO->>-BE: HTTP 200 OK <br>{"access_token": "{OperatorAccessToken}"}
+  end  
+end
+BE->>ExpO: Access Operator CAMARA API<br>Authorization: Bearer {OperatorAccessToken}    
+ExpO->>ExpO: Decrypt OperatorAccessToken,<br>grants Access,<br>progresses request to API Backend,<br>gets API response  
+ExpO->>BE: CAMARA API Response
+Note over BE,FE: Response
+```
+
+
+
 
 #### Client Credentials
 
